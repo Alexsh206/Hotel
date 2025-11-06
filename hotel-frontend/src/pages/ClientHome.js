@@ -10,7 +10,6 @@ const ClientHome = () => {
     useEffect(() => {
         getRooms()
             .then((data) => {
-                // 🔹 Унікальні кімнати за типом
                 const uniqueByType = data.reduce((acc, room) => {
                     if (!acc.some((r) => r.type === room.type)) {
                         acc.push(room);

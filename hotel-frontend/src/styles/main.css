@@ -82,3 +82,37 @@ body {
     font-size: 24px;
     cursor: pointer;
 }
+.booking-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 24px;
+}
+
+.booking-image {
+    width: 100%;
+    border-radius: 12px;
+    margin: 16px 0;
+}
+
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.confirm-button {
+    background: #0077cc;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.confirm-button:hover {
+    background: #005fa3;
+}
