@@ -28,13 +28,11 @@ public class AuthController {
         this.jwtConfig = jwtConfig;
     }
 
-    // Стара посилання: POST /api/auth/login
     @PostMapping("/api/auth/login")
     public ResponseEntity<?> loginApi(@RequestBody LoginRequest creds) {
         return doLogin(creds);
     }
 
-    // Нова посилання: POST /login
     @PostMapping("/login")
     public ResponseEntity<?> loginRoot(@RequestBody LoginRequest creds) {
         return doLogin(creds);
@@ -55,7 +53,6 @@ public class AuthController {
                 );
     }
 
-    // Формування відповіді з токеном
     private ResponseEntity<Map<String, Object>> buildResponse(Long id, String role, Map<String, Object> extras) {
         String token = jwtConfig.createToken(Math.toIntExact(id), role);
         Map<String, Object> out = new HashMap<>(extras);

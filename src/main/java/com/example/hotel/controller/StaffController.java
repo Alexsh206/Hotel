@@ -70,7 +70,7 @@ public class StaffController {
     @PostMapping("/login")
     public ResponseEntity<Staff> login(@RequestBody LoginRequest creds) {
         return staffService
-                .login(creds.getPhone(), creds.getPassword())
+                .login(creds.getEmail(), creds.getPassword())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(401).build());
     }
@@ -79,7 +79,7 @@ public class StaffController {
     @Setter
     @Getter
     public static class LoginRequest {
-        private String phone;
+        private String Email;
         private String password;
 
     }

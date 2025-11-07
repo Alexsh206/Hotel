@@ -4,6 +4,7 @@ import com.example.hotel.model.Customers;
 import com.example.hotel.repository.CustomersRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
@@ -30,10 +31,15 @@ public class CustomerService {
         existing.setName(updated.getName());
         existing.setEmail(updated.getEmail());
         existing.setPhone(updated.getPhone());
+        existing.setPassword(updated.getPassword());
         return repo.save(existing);
     }
 
     public void delete(Long id) {
         repo.deleteById(id);
+    }
+
+    public Optional<Customers> login(String Email, String password) {
+        return repo.findByEmailAndPassword(Email, password);
     }
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getRooms } from "../api";
+import {useParams, useNavigate, Link} from "react-router-dom";
+import { getRooms } from "../api/api";
 import RoomGallery from "../components/RoomGallery";
 
 const RoomDetails = () => {
@@ -30,7 +30,7 @@ const RoomDetails = () => {
             <p className="description">{room.description}</p>
             <p><strong>Ціна:</strong> ${room.price} / ніч</p>
 
-            <button className="book-btn">Забронювати</button>
+            <Link to="/login" className="book-btn">Забронювати</Link>
         </div>
     );
 };

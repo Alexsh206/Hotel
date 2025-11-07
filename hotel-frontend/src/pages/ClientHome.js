@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getRooms } from "../api";
+import { getRooms } from "../api/api";
 import HotelInfo from "../components/HotelInfo";
 import RoomCard from "../components/RoomCard";
 
