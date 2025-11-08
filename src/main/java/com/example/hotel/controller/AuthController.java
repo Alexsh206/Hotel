@@ -65,7 +65,7 @@ public class AuthController {
     @Setter
     @Getter
     public static class LoginRequest {
-        private String Email;
+        private String email;
         private String password;
     }
 }

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useAuth } from '../auth/AuthProvider'
 
 export default function LoginPage() {
-    const [Email,    setEmail]    = useState('')
+    const [email,    setEmail]    = useState('')
     const [password, setPassword] = useState('')
     const [error,    setError]    = useState('')
     const [loading,  setLoading]  = useState(false)
@@ -10,10 +10,11 @@ export default function LoginPage() {
 
     const handleSubmit = async e => {
         e.preventDefault()
+        console.log("✅ handleSubmit викликано")
         setError('')
         setLoading(true)
 
-        const ok = await login({ Email, password })
+        const ok = await login({ email, password })
         setLoading(false)
         if (!ok) {
             setError('Невірний Email або пароль')
@@ -31,7 +32,7 @@ export default function LoginPage() {
                         <label>Email:</label>
                         <input
                             type="text"
-                            value={Email}
+                            value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
                             disabled={loading}

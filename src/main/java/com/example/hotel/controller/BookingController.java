@@ -2,9 +2,9 @@ package com.example.hotel.controller;
 
 import com.example.hotel.model.Bookings;
 import com.example.hotel.service.BookingService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,21 +23,29 @@ public class BookingController {
         return service.getAll();
     }
 
-    @GetMapping("/{id}")
-    public Bookings getById(@PathVariable Long id) {
-        return service.getById(id);
+    @GetMapping("/customer/{id}")
+    public List<Bookings> getByCustomer(@PathVariable Long id) {
+        return service.getByCustomerId(id);
     }
 
+    // ✅ JSON-версія
     @PostMapping
-    public Bookings createBooking(
-            @RequestParam Long customerId,
-            @RequestParam Long roomId,
-            @RequestParam String checkIn,
-            @RequestParam String checkOut
-    ) {
-        LocalDate from = LocalDate.parse(checkIn);
-        LocalDate to = LocalDate.parse(checkOut);
-        return service.createBooking(customerId, roomId, from, to);
+    public ResponseEntity<?> create(@RequestBody Bookings booking) {
+        try {
+            return ResponseEntity.ok(service.createBooking(booking));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                    "❌ Некоректні дати: дата виїзду повинна бути пізніше дати заїзду."
+            );
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(
+                    "❌ Обрана кімната вже заброньована на вибрані дати."
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(
+                    "❌ Помилка створення бронювання: " + e.getMessage()
+            );
+        }
     }
 
     @PutMapping("/{id}/cancel")

@@ -10,8 +10,7 @@ const http = axios.create({
 });
 
 export async function login({ email, password }) {
-    const res = await http.post("/auth/login", { email, password });
-    return res.data;
+    return axios.post(`${API_BASE}/auth/login`, { email, password });
 }
 
 export async function getProfile(){

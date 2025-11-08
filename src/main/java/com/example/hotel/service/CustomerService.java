@@ -39,7 +39,7 @@ public class CustomerService {
         repo.deleteById(id);
     }
 
-    public Optional<Customers> login(String Email, String password) {
-        return repo.findByEmailAndPassword(Email, password);
+    public Optional<Customers> login(String email, String password) {
+        return repo.findByEmailAndPassword(email, password);
     }
 }
