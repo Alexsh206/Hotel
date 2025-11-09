@@ -35,3 +35,8 @@ export async function createBooking(booking) {
     const res = await http.post("/bookings", booking);
     return res.data;
 }
+
+export const createPayment = async (payment) => {
+    const res = await axios.post(`${API_BASE}/payments`, payment);
+    return res.data;
+};

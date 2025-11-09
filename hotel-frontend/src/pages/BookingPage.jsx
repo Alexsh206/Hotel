@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getRooms, createBooking } from "../api/api";
 import { useAuth } from "../auth/AuthProvider";
+import PaymentModal from "../components/PaymentModal";
 
 export default function BookingPage() {
     const { user, isAuthenticated } = useAuth();
@@ -10,9 +11,9 @@ export default function BookingPage() {
     const [checkOut, setCheckOut] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [newBooking, setNewBooking] = useState(null); // ✅ зберігаємо бронювання для оплати
 
-
-    // ✅ завантажуємо кімнати (по типу)
+    // ✅ завантаження кімнат
     useEffect(() => {
         setLoading(true);
         getRooms()
@@ -29,6 +30,7 @@ export default function BookingPage() {
             .finally(() => setLoading(false));
     }, []);
 
+    // ✅ створення бронювання
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
@@ -48,8 +50,9 @@ export default function BookingPage() {
         };
 
         try {
-            await createBooking(booking);
+            const res = await createBooking(booking);
             setMessage("✅ Бронювання створено успішно!");
+            setNewBooking(res); // ✅ відкриваємо модалку оплати
             setSelectedRoom("");
             setCheckIn("");
             setCheckOut("");
@@ -71,6 +74,7 @@ export default function BookingPage() {
         <div className="booking-wrapper">
             <div className="booking-card">
                 <h1>Бронювання номера</h1>
+
                 {message && (
                     <div
                         className="message"
@@ -134,6 +138,14 @@ export default function BookingPage() {
                     </button>
                 </form>
             </div>
+
+            {/* ✅ Модальне вікно оплати */}
+            {newBooking && (
+                <PaymentModal
+                    booking={newBooking}
+                    onClose={() => setNewBooking(null)}
+                />
+            )}
         </div>
     );
 }

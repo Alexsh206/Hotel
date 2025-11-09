@@ -24,8 +24,15 @@ export default function CustomerPage() {
                     axios.get(`${API_BASE}/bookings/customer/${user.id}`),
                     axios.get(`${API_BASE}/rooms`)
                 ]);
+
                 setBookings(bookingsRes.data);
-                setRooms(roomsRes.data);
+
+                // 🔹 Вибираємо лише унікальні номери (по type)
+                const uniqueByType = roomsRes.data.reduce((acc, room) => {
+                    if (!acc.some(r => r.type === room.type)) acc.push(room);
+                    return acc;
+                }, []);
+                setRooms(uniqueByType);
             } catch (err) {
                 console.error("Помилка при завантаженні даних:", err);
             } finally {
@@ -45,14 +52,16 @@ export default function CustomerPage() {
         <div className="customer-page">
             <header className="customer-header">
                 <h1>👋 Вітаємо, {user.name}</h1>
-                <button className="logout-btn" onClick={logout}>Вийти</button>
+                <button className="logout-btn" onClick={logout}>
+                    🚪 Вийти з акаунту
+                </button>
             </header>
 
             <section className="profile-section">
                 <h2>Ваш профіль</h2>
                 <p><b>Ім’я:</b> {user.name}</p>
-                <p><b>Email:</b> {user.email}</p>
-                <p><b>Телефон:</b> {user.phone}</p>
+                <p><b>Email:</b> {user.email || "—"}</p>
+                <p><b>Телефон:</b> {user.phone || "—"}</p>
             </section>
 
             <section className="active-bookings">
@@ -63,7 +72,7 @@ export default function CustomerPage() {
                     <ul>
                         {activeBookings.map(b => (
                             <li key={b.id}>
-                                Номер: <b>{b.room.type}</b> | З {b.checkIn} по {b.checkOut}
+                                Номер: <b>{b.room.type}</b> | {b.checkIn} → {b.checkOut}
                             </li>
                         ))}
                     </ul>
