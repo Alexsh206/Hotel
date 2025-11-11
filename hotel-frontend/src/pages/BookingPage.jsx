@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getRooms, createBooking } from "../api/api";
 import { useAuth } from "../auth/AuthProvider";
 import PaymentModal from "../components/PaymentModal";
+import {useLocation, useNavigate} from "react-router-dom";
 
 export default function BookingPage() {
     const { user, isAuthenticated } = useAuth();
@@ -11,9 +12,16 @@ export default function BookingPage() {
     const [checkOut, setCheckOut] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
-    const [newBooking, setNewBooking] = useState(null); // ✅ зберігаємо бронювання для оплати
+    const [newBooking, setNewBooking] = useState(null);
+    const navigate = useNavigate();
+    const location = useLocation();
 
-    // ✅ завантаження кімнат
+    useEffect(() => {
+        if (!isAuthenticated) {
+            navigate("/login", { state: { from: location }, replace: true });
+        }
+    }, [isAuthenticated, navigate, location]);
+
     useEffect(() => {
         setLoading(true);
         getRooms()

@@ -26,27 +26,23 @@ export function AuthProvider({ children }) {
 
     if (loading) return <div>Завантаження...</div>;
 
-    // 🔹 2. Авторизація
     const login = async ({ email, password }) => {
         try {
             const resp = await api.login({ email, password });
             if (resp?.status === 200) {
                 const { token, role, id, name, position } = resp.data;
-
-                // ✅ Зберігаємо токен і користувача
                 const profile = { id, role, name, position, email };
                 localStorage.setItem("token", token);
                 localStorage.setItem("user", JSON.stringify(profile));
 
                 setUser(profile);
 
-                // Перехід після логіну
                 if (role === "customer") {
-                    nav("/customer", { replace: true });
+                    nav("/", { replace: true });
                 } else if (role === "admin") {
                     nav(`/dashboard/admin/${id}`, { replace: true });
                 } else {
-                    nav(`/dashboard/staff/${id}`, { replace: true });
+                    nav(`/staff`, { replace: true });
                 }
                 return true;
             }

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { getRooms } from "../api/api";
 import HotelInfo from "../components/HotelInfo";
 import RoomCard from "../components/RoomCard";
-import "../styles/main.css";
+import { useAuth } from "../auth/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 const ClientHome = () => {
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
-    const nav = useNavigate();
+    const { isAuthenticated, logout } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         getRooms()
@@ -27,33 +28,50 @@ const ClientHome = () => {
 
     return (
         <div className="client-home">
-            {/* 🔹 Верхня панель */}
+            {/* 🌟 Верхній хедер */}
             <header className="home-header">
-                <div className="logo">
-                    🏨 <span>HotelBooking</span>
+                <div className="logo" onClick={() => navigate("/")}>
+                    🏨 Hotel Booking
                 </div>
+
                 <div className="auth-buttons">
-                    <button
-                        className="btn-login"
-                        onClick={() => nav("/login")}
-                    >
-                        Увійти в акаунт
-                    </button>
-                    <button
-                        className="btn-register"
-                        onClick={() => nav("/register")}
-                    >
-                        Зареєструватися
-                    </button>
+                    {isAuthenticated ? (
+                        <>
+                            <button
+                                className="btn-profile"
+                                onClick={() => navigate("/customer")}
+                            >
+                                Мій профіль
+                            </button>
+                            <button className="btn-logout" onClick={logout}>
+                                Вийти
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button
+                                className="btn-login"
+                                onClick={() => navigate("/login")}
+                            >
+                                Увійти
+                            </button>
+                            <button
+                                className="btn-register"
+                                onClick={() => navigate("/register")}
+                            >
+                                Реєстрація
+                            </button>
+                        </>
+                    )}
                 </div>
             </header>
 
-            {/* 🔹 Інформація про готель */}
             <HotelInfo />
 
-            <h2>Наші номери</h2>
+            <h2 style={{ textAlign: "center", marginTop: "20px" }}>Наші номери</h2>
+
             {loading ? (
-                <p>Завантаження...</p>
+                <p style={{ textAlign: "center" }}>Завантаження...</p>
             ) : (
                 <div className="room-list">
                     {rooms.map((r) => (

@@ -45,8 +45,22 @@ export default function CustomerPage() {
 
     if (!user) return null;
 
-    const activeBookings = bookings.filter(b => b.status === "ACTIVE");
-    const pastBookings = bookings.filter(b => b.status === "CANCELED" || b.status === "COMPLETED");
+    const today = new Date();
+
+    const activeBookings = bookings.filter(b => {
+        const checkOutDate = new Date(b.checkOut);
+        return b.status === "ACTIVE" && checkOutDate >= today;
+    });
+
+    const pastBookings = bookings.filter(b => {
+        const checkOutDate = new Date(b.checkOut);
+        return (
+            b.status === "CANCELED" ||
+            b.status === "COMPLETED" ||
+            checkOutDate < today
+        );
+    });
+
 
     return (
         <div className="customer-page">

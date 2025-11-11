@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 const RoomCard = ({ room }) => {
     const navigate = useNavigate();
 
+    // 🖼️ Відображення зображення залежно від типу номера
     const getRoomImage = (type) => {
         const map = {
             "Budget Double Room": "/assets/rooms/budget.jpg",
@@ -17,28 +18,45 @@ const RoomCard = ({ room }) => {
         return map[type] || "/assets/rooms/default.jpg";
     };
 
-    const imageSrc = room.imageUrl || getRoomImage(room.type);
+    // 📝 Індивідуальні описи номерів
+    const getRoomDescription = (type) => {
+        const descriptions = {
+            "Budget Double Room": "Затишний економ-номер для двох із базовими зручностями та приємним інтер’єром.",
+            "Double Room with king-size bed": "Просторий номер із великим ліжком king-size, телевізором і видом на місто.",
+            "Double Room with two beds": "Зручний варіант для двох гостей — дві окремі комфортні постелі та простора ванна.",
+            "Triple Room": "Комфортний номер на трьох із кондиціонером, телевізором і безкоштовним Wi-Fi.",
+            "Lux Room": "Покращений номер із панорамними вікнами, великим телевізором і міні-баром.",
+            "Lux-Plus Room": "Великий сучасний номер із балконом, зоною відпочинку та джакузі.",
+            "President Lux Room": "Розкішний президентський люкс із вітальнею, кабінетом і панорамним видом на місто.",
+        };
+        return descriptions[type] || "Сучасний номер із комфортними умовами, кондиціонером, Wi-Fi та сніданком.";
+    };
+
+    const handleBook = (e) => {
+        e.stopPropagation();
+        navigate(`/booking?roomId=${room.id}`);
+    };
 
     return (
-        <div
-            className="room-card"
-            onClick={() => navigate(`/rooms/${room.id}`)}
-            style={{ cursor: "pointer" }}
-        >
+        <div className="room-card">
             <img
-                src={imageSrc}
+                src={getRoomImage(room.type)}
                 alt={room.type}
                 className="room-image"
-                loading="lazy"
             />
+
             <div className="room-info">
-                <h3 className="room-title">{room.type}</h3>
-                {room.description && (
-                    <p className="room-desc">{room.description}</p>
-                )}
+                <h3>{room.type}</h3>
+                <p className="room-description">
+                    {getRoomDescription(room.type)}
+                </p>
                 <p className="room-price">
                     <strong>Ціна:</strong> {room.price}₴ / ніч
                 </p>
+
+                <button className="book-btn" onClick={handleBook}>
+                    Забронювати
+                </button>
             </div>
         </div>
     );

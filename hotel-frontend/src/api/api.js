@@ -24,16 +24,24 @@ export async function getRooms() {
 }
 
 
-// 🔹 отримати всі бронювання
 export async function getBookings() {
     const res = await http.get("/bookings");
     return res.data;
 }
 
-// 🔹 створити нове бронювання
 export async function createBooking(booking) {
     const res = await http.post("/bookings", booking);
     return res.data;
+}
+
+export async function updateBooking(id, updatedData) {
+    try {
+        const res = await axios.put(`${API_BASE}/bookings/${id}`, updatedData);
+        return res.data;
+    } catch (err) {
+        console.error("Помилка при оновленні бронювання:", err);
+        throw err;
+    }
 }
 
 export const createPayment = async (payment) => {

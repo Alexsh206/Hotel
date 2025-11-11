@@ -36,7 +36,6 @@ public class BookingService {
         Customers customer = customerRepo.findById(booking.getCustomer().getId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        // ✅ перевірка на перетин
         List<Bookings> overlaps = bookingRepo.findOverlaps(room.getId(), from, to);
         if (!overlaps.isEmpty()) {
             throw new IllegalStateException("Room not available for the selected dates");
@@ -63,5 +62,21 @@ public class BookingService {
 
     public List<Bookings> getByCustomerId(Long id) {
         return bookingRepo.findByCustomerId(id);
+    }
+
+    @Transactional
+    public Bookings updateBooking(Long id, Bookings updated) {
+        Bookings existing = bookingRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        if (updated.getCheckIn() != null) existing.setCheckIn(updated.getCheckIn());
+        if (updated.getCheckOut() != null) existing.setCheckOut(updated.getCheckOut());
+        if (updated.getStatus() != null) existing.setStatus(updated.getStatus());
+
+        if (!existing.getCheckIn().isBefore(existing.getCheckOut())) {
+            throw new IllegalArgumentException("Некоректні дати: check-in має бути раніше за check-out");
+        }
+
+        return bookingRepo.save(existing);
     }
 }

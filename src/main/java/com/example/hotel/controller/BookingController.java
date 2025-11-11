@@ -35,15 +35,15 @@ public class BookingController {
             return ResponseEntity.ok(service.createBooking(booking));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
-                    "❌ Некоректні дати: дата виїзду повинна бути пізніше дати заїзду."
+                    " Некоректні дати: дата виїзду повинна бути пізніше дати заїзду."
             );
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(
-                    "❌ Обрана кімната вже заброньована на вибрані дати."
+                    " Обрана кімната вже заброньована на вибрані дати."
             );
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(
-                    "❌ Помилка створення бронювання: " + e.getMessage()
+                    " Помилка створення бронювання: " + e.getMessage()
             );
         }
     }
@@ -51,5 +51,9 @@ public class BookingController {
     @PutMapping("/{id}/cancel")
     public Bookings cancel(@PathVariable Long id) {
         return service.cancelBooking(id);
+    }
+    @PutMapping("/{id}")
+    public Bookings updateBooking(@PathVariable Long id, @RequestBody Bookings updated) {
+        return service.updateBooking(id, updated);
     }
 }
