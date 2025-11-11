@@ -10,7 +10,6 @@ export default function LoginPage() {
 
     const handleSubmit = async e => {
         e.preventDefault()
-        console.log("✅ handleSubmit викликано")
         setError('')
         setLoading(true)
 

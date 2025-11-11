@@ -1,10 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
+import { getReviews, createReview } from "../api/api";
 
 const RoomCard = ({ room }) => {
     const navigate = useNavigate();
+    const { user, isAuthenticated } = useAuth();
 
-    // 🖼️ Відображення зображення залежно від типу номера
+    const [reviews, setReviews] = useState([]);
+    const [rating, setRating] = useState("");
+    const [comment, setComment] = useState("");
+
+    // 🧩 Отримання всіх відгуків
+    useEffect(() => {
+        getReviews()
+            .then((res) => {
+                const filtered = res.data.filter(r => r.room?.id === room.id);
+                setReviews(filtered);
+            })
+            .catch((err) => console.error("Помилка завантаження відгуків:", err));
+    }, [room.id]);
+
+    // 🧮 Середня оцінка
+    const avgRating =
+        reviews.length > 0
+            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+            : "—";
+
+    // 🖼️ Зображення номеру
     const getRoomImage = (type) => {
         const map = {
             "Budget Double Room": "/assets/rooms/budget.jpg",
@@ -18,7 +41,7 @@ const RoomCard = ({ room }) => {
         return map[type] || "/assets/rooms/default.jpg";
     };
 
-    // 📝 Індивідуальні описи номерів
+    // 📝 Опис номеру
     const getRoomDescription = (type) => {
         const descriptions = {
             "Budget Double Room": "Затишний економ-номер для двох із базовими зручностями та приємним інтер’єром.",
@@ -32,9 +55,35 @@ const RoomCard = ({ room }) => {
         return descriptions[type] || "Сучасний номер із комфортними умовами, кондиціонером, Wi-Fi та сніданком.";
     };
 
+    // 🪙 Перехід до бронювання
     const handleBook = (e) => {
         e.stopPropagation();
         navigate(`/booking?roomId=${room.id}`);
+    };
+
+    const handleSubmitReview = async (e) => {
+        e.preventDefault();
+        if (!isAuthenticated) {
+            alert("Спочатку увійдіть у систему, щоб залишити відгук.");
+            return;
+        }
+
+        try {
+            const newReview = {
+                rating: parseInt(rating),
+                comment,
+                room: { id: room.id },
+                customer: { id: user.id },
+            };
+            await createReview(newReview);
+            setRating("");
+            setComment("");
+            const updated = await getReviews();
+            setReviews(updated.data.filter(r => r.room?.id === room.id));
+            alert("✅ Відгук успішно додано!");
+        } catch (err) {
+            console.error("Помилка створення відгуку:", err);
+        }
     };
 
     return (
@@ -47,16 +96,44 @@ const RoomCard = ({ room }) => {
 
             <div className="room-info">
                 <h3>{room.type}</h3>
-                <p className="room-description">
-                    {getRoomDescription(room.type)}
-                </p>
+                <p className="room-description">{getRoomDescription(room.type)}</p>
                 <p className="room-price">
                     <strong>Ціна:</strong> {room.price}₴ / ніч
                 </p>
+                <p>⭐ <b>Рейтинг:</b> {avgRating} / 5</p>
 
                 <button className="book-btn" onClick={handleBook}>
                     Забронювати
                 </button>
+
+                {/* ✨ Форма для відгуку */}
+                {isAuthenticated && (
+                    <form className="review-form" onSubmit={handleSubmitReview}>
+                        <h4>Залишити відгук</h4>
+                        <label>
+                            Оцінка:
+                            <select
+                                value={rating}
+                                onChange={(e) => setRating(e.target.value)}
+                                required
+                            >
+                                <option value="">—</option>
+                                {[1, 2, 3, 4, 5].map((n) => (
+                                    <option key={n} value={n}>
+                                        {n}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <textarea
+                            placeholder="Ваш коментар..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            required
+                        />
+                        <button type="submit">Надіслати</button>
+                    </form>
+                )}
             </div>
         </div>
     );

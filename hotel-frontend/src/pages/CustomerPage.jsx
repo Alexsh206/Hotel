@@ -27,7 +27,6 @@ export default function CustomerPage() {
 
                 setBookings(bookingsRes.data);
 
-                // 🔹 Вибираємо лише унікальні номери (по type)
                 const uniqueByType = roomsRes.data.reduce((acc, room) => {
                     if (!acc.some(r => r.type === room.type)) acc.push(room);
                     return acc;
@@ -65,9 +64,9 @@ export default function CustomerPage() {
     return (
         <div className="customer-page">
             <header className="customer-header">
-                <h1>👋 Вітаємо, {user.name}</h1>
+                <h1>Вітаємо, {user.name}</h1>
                 <button className="logout-btn" onClick={logout}>
-                    🚪 Вийти з акаунту
+                    Вийти з акаунту
                 </button>
             </header>
 

@@ -48,3 +48,8 @@ export const createPayment = async (payment) => {
     const res = await axios.post(`${API_BASE}/payments`, payment);
     return res.data;
 };
+
+export const getReviews = () => axios.get(`${API_BASE}/reviews`);
+export const getReviewsByRoom = (roomId) => axios.get(`${API_BASE}/reviews?roomId=${roomId}`);
+export const createReview = (review) => axios.post(`${API_BASE}/reviews`, review);
+export const deleteReview = (id) => axios.delete(`${API_BASE}/reviews/${id}`);

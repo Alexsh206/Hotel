@@ -45,11 +45,11 @@ export default function StaffPage() {
                 [field]: value,
             });
 
-            setMessage("✅ Бронювання оновлено успішно!");
+            setMessage(" Бронювання оновлено успішно!");
             setTimeout(() => setMessage(""), 2000);
         } catch (err) {
             console.error("Помилка при оновленні:", err);
-            setMessage("❌ Не вдалося оновити бронювання");
+            setMessage(" Не вдалося оновити бронювання");
         }
     };
 
@@ -66,7 +66,7 @@ export default function StaffPage() {
     return (
         <div className="staff-page">
             <header className="customer-header">
-                <h1>🧑‍💼 Панель персоналу</h1>
+                <h1>Панель персоналу</h1>
                 <button className="logout-btn" onClick={logout}>Вийти</button>
             </header>
 
@@ -136,7 +136,7 @@ export default function StaffPage() {
                                 className="save-btn"
                                 onClick={() => updateBooking(b.id, "status", b.status)}
                             >
-                                💾 Зберегти
+                                Зберегти
                             </button>
                         </td>
                     </tr>

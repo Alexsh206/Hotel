@@ -28,10 +28,9 @@ const ClientHome = () => {
 
     return (
         <div className="client-home">
-            {/* 🌟 Верхній хедер */}
             <header className="home-header">
                 <div className="logo" onClick={() => navigate("/")}>
-                    🏨 Hotel Booking
+                    Hotel Booking
                 </div>
 
                 <div className="auth-buttons">

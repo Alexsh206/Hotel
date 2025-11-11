@@ -21,11 +21,11 @@ export default function PaymentModal({ booking, onClose }) {
 
         try {
             await createPayment(paymentData);
-            setMessage("✅ Оплату виконано успішно!");
+            setMessage("Оплату виконано успішно!");
             setTimeout(onClose, 2000);
         } catch (err) {
             console.error("Помилка оплати:", err);
-            setMessage("❌ Не вдалося виконати оплату");
+            setMessage("Не вдалося виконати оплату");
         } finally {
             setLoading(false);
         }
@@ -34,7 +34,7 @@ export default function PaymentModal({ booking, onClose }) {
     return (
         <div className="modal-backdrop">
             <div className="modal">
-                <h2>💳 Оплата бронювання</h2>
+                <h2>Оплата бронювання</h2>
                 <p>
                     Номер: <b>{booking.room?.type}</b>
                     <br />

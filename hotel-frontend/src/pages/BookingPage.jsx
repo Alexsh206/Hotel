@@ -38,7 +38,6 @@ export default function BookingPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    // ✅ створення бронювання
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
@@ -97,7 +96,6 @@ export default function BookingPage() {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    {/* Вибір номера */}
                     <div className="field">
                         <label>Виберіть номер:</label>
                         <select
@@ -140,14 +138,12 @@ export default function BookingPage() {
                         />
                     </div>
 
-                    {/* Кнопка */}
                     <button type="submit" disabled={loading}>
                         {loading ? "Надсилання..." : "Забронювати"}
                     </button>
                 </form>
             </div>
 
-            {/* ✅ Модальне вікно оплати */}
             {newBooking && (
                 <PaymentModal
                     booking={newBooking}
