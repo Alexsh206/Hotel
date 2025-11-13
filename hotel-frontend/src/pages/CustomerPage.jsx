@@ -44,6 +44,10 @@ export default function CustomerPage() {
 
     if (!user) return null;
 
+    if (loading) {
+        return <p style={{ textAlign: "center", marginTop: "30px" }}>⏳ Завантаження...</p>;
+    }
+
     const today = new Date();
 
     const activeBookings = bookings.filter(b => {

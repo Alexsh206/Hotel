@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
                     nav("/", { replace: true });
                 } else if (role === "admin") {
                     nav(`/dashboard/admin/${id}`, { replace: true });
-                } else {
+                } else if (role === "staff") {
                     nav(`/staff`, { replace: true });
                 }
                 return true;

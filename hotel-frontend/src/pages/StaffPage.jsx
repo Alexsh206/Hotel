@@ -20,7 +20,7 @@ export default function StaffPage() {
         }
 
         loadBookings();
-    }, [user]);
+    }, [user, isAuthenticated, navigate]);
 
     const loadBookings = async () => {
         try {
@@ -35,15 +35,13 @@ export default function StaffPage() {
 
     const updateBooking = async (id, field, value) => {
         try {
-            const updated = bookings.map((b) =>
+            const updatedList = bookings.map((b) =>
                 b.id === id ? { ...b, [field]: value } : b
             );
-            setBookings(updated);
+            setBookings(updatedList);
 
-            await axios.put(`${API_BASE}/bookings/${id}`, {
-                ...bookings.find((b) => b.id === id),
-                [field]: value,
-            });
+            const bookingToUpdate = updatedList.find((b) => b.id === id);
+            await axios.put(`${API_BASE}/bookings/${id}`, bookingToUpdate);
 
             setMessage(" Бронювання оновлено успішно!");
             setTimeout(() => setMessage(""), 2000);
@@ -61,13 +59,25 @@ export default function StaffPage() {
         updateBooking(id, field, value);
     };
 
-    if (loading) return <p>Завантаження...</p>;
+    if (loading) return <p style={{ textAlign: "center", marginTop: "30px" }}>⏳ Завантаження...</p>;
 
     return (
         <div className="staff-page">
             <header className="customer-header">
                 <h1>Панель персоналу</h1>
-                <button className="logout-btn" onClick={logout}>Вийти</button>
+
+                <div className="staff-header-buttons">
+                    <button
+                        className="btn-dashboard"
+                        onClick={() => navigate("/dashboard")}
+                    >
+                        📊 Аналітика
+                    </button>
+
+                    <button className="logout-btn" onClick={logout}>
+                        🚪 Вийти
+                    </button>
+                </div>
             </header>
 
             {message && (
@@ -136,7 +146,7 @@ export default function StaffPage() {
                                 className="save-btn"
                                 onClick={() => updateBooking(b.id, "status", b.status)}
                             >
-                                Зберегти
+                                💾 Зберегти
                             </button>
                         </td>
                     </tr>

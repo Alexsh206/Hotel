@@ -1,5 +1,6 @@
 package com.example.hotel.repository;
 
+import com.example.hotel.model.BookingStatus;
 import com.example.hotel.model.Bookings;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,15 @@ public interface BookingRepository extends JpaRepository<Bookings, Long> {
             @Param("to") LocalDate to
     );
     List<Bookings> findByCustomerId(Long id);
+
+    // 🔹 Підрахунок бронювань за статусом
+    long countByStatus(BookingStatus status);
+
+    // 🔹 Бронювання за період (для динаміки)
+    @Query("SELECT b FROM Bookings b WHERE b.checkIn >= :from AND b.checkOut <= :to")
+    List<Bookings> findByPeriod(LocalDate from, LocalDate to);
+
+    // 🔹 Найпопулярніші типи кімнат
+    @Query("SELECT b.room.type, COUNT(b) FROM Bookings b GROUP BY b.room.type ORDER BY COUNT(b) DESC")
+    List<Object[]> getMostBookedRoomTypes();
 }
