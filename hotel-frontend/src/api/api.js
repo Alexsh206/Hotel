@@ -88,3 +88,17 @@ export async function getOverview() {
     if (!res.ok) throw new Error("Не вдалося завантажити аналітику");
     return res.json();
 }
+export const getRevenueByPeriod = async (start, end) => {
+    try {
+        const res = await axios.get(
+            `${API_BASE}/statistics/revenue/period`,
+            {
+                params: { start, end },
+            }
+        );
+        return res.data;
+    } catch (err) {
+        console.error("❌ Error fetching revenue by period:", err);
+        throw err;
+    }
+};

@@ -77,4 +77,20 @@ public class StatisticsService {
                 .map(o -> Map.of("method", o[0], "amount", o[1]))
                 .collect(Collectors.toList());
     }
+    public Map<String, Object> getRevenueByPeriod(String startStr, String endStr) {
+        LocalDate start = LocalDate.parse(startStr);
+        LocalDate end = LocalDate.parse(endStr);
+
+        Double total = paymentRepo.getRevenueByPeriod(
+                start.atStartOfDay(),
+                end.plusDays(1).atStartOfDay()
+        );
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("start", startStr);
+        result.put("end", endStr);
+        result.put("totalRevenue", Optional.ofNullable(total).orElse(0.0));
+
+        return result;
+    }
 }

@@ -40,4 +40,13 @@ public class StatisticsController {
     public List<Map<String, Object>> getRevenueByMethod() {
         return service.getRevenueByPaymentMethod();
     }
+
+    @GetMapping("/revenue/period")
+    public Map<String, Object> getRevenueByPeriod(
+            @RequestParam String start,
+            @RequestParam String end
+    ) {
+        return service.getRevenueByPeriod(start, end);
+    }
+
 }

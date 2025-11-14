@@ -17,7 +17,8 @@ import {
     getMonthlyRevenue,
     getPopularRooms,
     getTopRatedRooms,
-    getRevenueByPaymentMethod
+    getRevenueByPaymentMethod,
+    getRevenueByPeriod
 } from "../api/api";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -32,7 +33,7 @@ const asPairs = (data) => {
             return [];
         }
     }
-    return []; // усе інше — число, рядок, boolean
+    return [];
 };
 
 const toObjects = (data, key1, key2) => {
@@ -47,7 +48,6 @@ const toObjects = (data, key1, key2) => {
             )
             .map(([k, v]) => ({ [key1]: k, [key2]: v }));
     } catch (e) {
-        console.warn("⚠️ toObjects error for", key1, key2, e);
         return [];
     }
 };
@@ -67,6 +67,7 @@ const normalizeData = {
 
 export default function DashboardPage() {
     const { user, isAuthenticated } = useAuth();
+
     const [overview, setOverview] = useState(null);
     const [monthlyRevenue, setMonthlyRevenue] = useState([]);
     const [popularRooms, setPopularRooms] = useState([]);
@@ -75,8 +76,14 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // --- Нові стани для "Доходу за період" ---
+    const [revStart, setRevStart] = useState("");
+    const [revEnd, setRevEnd] = useState("");
+    const [revenuePeriod, setRevenuePeriod] = useState(null);
+
     const COLORS = ["#007bff", "#28a745", "#ffc107", "#ff4d4f", "#6f42c1"];
 
+    // --- Завантаження всіх стандартних даних ---
     useEffect(() => {
         const load = async () => {
             try {
@@ -94,31 +101,23 @@ export default function DashboardPage() {
                     getRevenueByPaymentMethod()
                 ]);
 
-                console.log("📊 RAW DATA:", {
-                    overview: overviewRes?.value,
-                    monthly: monthlyRes?.value,
-                    popular: popularRes?.value,
-                    rated: ratedRes?.value,
-                    methods: methodRes?.value
-                });
-
-                if (overviewRes.status === "fulfilled") {
+                if (overviewRes.status === "fulfilled")
                     setOverview(normalizeData.overview(overviewRes.value));
-                }
-                if (monthlyRes.status === "fulfilled") {
+
+                if (monthlyRes.status === "fulfilled")
                     setMonthlyRevenue(normalizeData.monthly(monthlyRes.value));
-                }
-                if (popularRes.status === "fulfilled") {
+
+                if (popularRes.status === "fulfilled")
                     setPopularRooms(normalizeData.popular(popularRes.value));
-                }
-                if (ratedRes.status === "fulfilled") {
+
+                if (ratedRes.status === "fulfilled")
                     setTopRatedRooms(normalizeData.rated(ratedRes.value));
-                }
-                if (methodRes.status === "fulfilled") {
+
+                if (methodRes.status === "fulfilled")
                     setRevenueByMethod(normalizeData.methods(methodRes.value));
-                }
+
             } catch (e) {
-                console.error("❌ Помилка завантаження статистики:", e);
+                console.error("❌ Помилка завантаження:", e);
                 setError("Не вдалося завантажити аналітику");
             } finally {
                 setLoading(false);
@@ -129,62 +128,89 @@ export default function DashboardPage() {
         else setLoading(false);
     }, [isAuthenticated, user]);
 
-    if (!isAuthenticated || !user) {
-        return (
-            <p style={{ textAlign: "center", marginTop: "50px" }}>
-                🚫 Доступ лише для адміністратора або персоналу.
-            </p>
-        );
-    }
+    // --- Функція завантаження доходу за період ---
+    const loadRevenuePeriod = async () => {
+        if (!revStart || !revEnd) return;
 
-    if (loading) {
-        return <p style={{ textAlign: "center", marginTop: "50px" }}>⏳ Завантаження аналітики...</p>;
-    }
+        try {
+            const data = await getRevenueByPeriod(revStart, revEnd);
+            setRevenuePeriod(data);
+        } catch (e) {
+            console.error("Помилка завантаження доходу за період:", e);
+        }
+    };
 
-    if (error || !overview) {
-        return <p style={{ textAlign: "center", marginTop: "50px" }}>⚠️ Дані аналітики недоступні.</p>;
-    }
+    if (!isAuthenticated || !user)
+        return <p style={{ textAlign: "center", marginTop: "50px" }}>🚫 Доступ заборонено.</p>;
+
+    if (loading)
+        return <p style={{ textAlign: "center", marginTop: "50px" }}>⏳ Завантаження...</p>;
+
+    if (error || !overview)
+        return <p style={{ textAlign: "center", marginTop: "50px" }}>⚠️ Дані недоступні.</p>;
 
     return (
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <h1>📊 Аналітика готелю</h1>
-                <p>Вітаємо, {user.name || "користувач"}! Нижче наведено актуальну статистику.</p>
+                <p>Вітаємо, {user.name || "користувач"}! Нижче показано актуальні дані.</p>
             </header>
 
+            {/* === ОГЛЯД === */}
             <section className="overview-section">
                 <div className="stat-card">
                     <h3>Бронювання</h3>
-                    <p className="value">{overview.totalBookings || 0}</p>
+                    <p className="value">{overview.totalBookings}</p>
                     <span>усього</span>
                 </div>
                 <div className="stat-card">
                     <h3>Активні</h3>
-                    <p className="value green">{overview.activeBookings || 0}</p>
-                    <span>поточні бронювання</span>
+                    <p className="value green">{overview.activeBookings}</p>
+                    <span>поточні</span>
                 </div>
                 <div className="stat-card">
                     <h3>Скасовані</h3>
-                    <p className="value red">{overview.canceledBookings || 0}</p>
+                    <p className="value red">{overview.canceledBookings}</p>
                     <span>всього</span>
                 </div>
                 <div className="stat-card">
                     <h3>Дохід</h3>
-                    <p className="value blue">
-                        {overview.totalRevenue ? overview.totalRevenue.toFixed(2) : 0} ₴
-                    </p>
-                    <span>усього отримано</span>
+                    <p className="value blue">{overview.totalRevenue.toFixed(2)} ₴</p>
+                    <span>усього</span>
                 </div>
                 <div className="stat-card">
                     <h3>Середній рейтинг</h3>
-                    <p className="value yellow">
-                        {overview.averageRating ? overview.averageRating.toFixed(1) : "—"} ⭐
-                    </p>
-                    <span>за всі номери</span>
+                    <p className="value yellow">{overview.averageRating?.toFixed(1) || "—"} ⭐</p>
+                    <span>по всіх номерах</span>
                 </div>
             </section>
 
-            {/* === ДІАГРАМИ === */}
+            {/* === ДОХОДИ ЗА ПЕРІОД === */}
+            <section className="chart-section">
+                <h2>💵 Дохід за вибраний період</h2>
+
+                <div className="filters-row" style={{ display: "flex", gap: "16px", marginBottom: "14px" }}>
+                    <input type="date" value={revStart} onChange={(e) => setRevStart(e.target.value)} />
+                    <input type="date" value={revEnd} onChange={(e) => setRevEnd(e.target.value)} />
+                    <button onClick={loadRevenuePeriod}>Завантажити</button>
+                </div>
+
+                {revenuePeriod ? (
+                    <div className="period-box">
+                        <p>
+                            📅 Період: <b>{revStart}</b> → <b>{revEnd}</b>
+                        </p>
+                        <p>
+                            💰 Доход: <b style={{ color: "green" }}>{revenuePeriod.totalRevenue} ₴</b>
+                        </p>
+                    </div>
+                ) : (
+                    <p>Оберіть період для перегляду доходів.</p>
+                )}
+            </section>
+
+            {/* === ІНШІ ГРАФІКИ === */}
+
             <section className="chart-section">
                 <h2>💰 Дохід по місяцях</h2>
                 {monthlyRevenue.length > 0 ? (
@@ -197,9 +223,7 @@ export default function DashboardPage() {
                             <Bar dataKey="revenue" fill="#007bff" />
                         </BarChart>
                     </ResponsiveContainer>
-                ) : (
-                    <p>Немає даних по доходу.</p>
-                )}
+                ) : <p>Немає даних.</p>}
             </section>
 
             <section className="chart-section">
@@ -214,13 +238,11 @@ export default function DashboardPage() {
                             <Bar dataKey="count" fill="#28a745" />
                         </BarChart>
                     </ResponsiveContainer>
-                ) : (
-                    <p>Немає даних по популярності номерів.</p>
-                )}
+                ) : <p>Немає даних.</p>}
             </section>
 
             <section className="chart-section">
-                <h2>⭐ Найкращі кімнати за рейтингом</h2>
+                <h2>⭐ Найкращі кімнати</h2>
                 {topRatedRooms.length > 0 ? (
                     <ResponsiveContainer width="100%" height={350}>
                         <BarChart data={topRatedRooms}>
@@ -231,13 +253,11 @@ export default function DashboardPage() {
                             <Bar dataKey="avgRating" fill="#ffc107" />
                         </BarChart>
                     </ResponsiveContainer>
-                ) : (
-                    <p>Немає даних по рейтингу кімнат.</p>
-                )}
+                ) : <p>Немає даних.</p>}
             </section>
 
             <section className="chart-section">
-                <h2>💳 Розподіл доходів за типом оплати</h2>
+                <h2>💳 Розподіл доходів за методом оплати</h2>
                 {revenueByMethod.length > 0 ? (
                     <ResponsiveContainer width="100%" height={400}>
                         <PieChart>
@@ -245,26 +265,19 @@ export default function DashboardPage() {
                                 data={revenueByMethod}
                                 cx="50%"
                                 cy="50%"
-                                labelLine={false}
                                 outerRadius={100}
-                                fill="#8884d8"
                                 dataKey="amount"
                                 nameKey="method"
                             >
                                 {revenueByMethod.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={COLORS[index % COLORS.length]}
-                                    />
+                                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
                             <Tooltip />
                             <Legend />
                         </PieChart>
                     </ResponsiveContainer>
-                ) : (
-                    <p>Немає даних про способи оплати.</p>
-                )}
+                ) : <p>Немає даних.</p>}
             </section>
         </div>
     );

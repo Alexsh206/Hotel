@@ -8,13 +8,26 @@ export default function PaymentModal({ booking, onClose }) {
 
     if (!booking) return null;
 
+    const getNights = (checkIn, checkOut) => {
+        const inDate = new Date(checkIn);
+        const outDate = new Date(checkOut);
+
+        const diff = outDate.getTime() - inDate.getTime();
+        const nights = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+        return nights > 0 ? nights : 1;
+    };
+
+    const nights = getNights(booking.checkIn, booking.checkOut);
+    const totalAmount = nights * (booking.room?.price || 0);
+
     const handlePayment = async () => {
         setLoading(true);
         setMessage("");
 
         const paymentData = {
-            booking: { id: booking.id }, // важливо: лише id, бо @ManyToOne
-            amount: booking.room?.price || 0,
+            booking: { id: booking.id },
+            amount: totalAmount,
             date: new Date().toISOString(),
             method,
         };
@@ -35,14 +48,15 @@ export default function PaymentModal({ booking, onClose }) {
         <div className="modal-backdrop">
             <div className="modal">
                 <h2>Оплата бронювання</h2>
+
                 <p>
-                    Номер: <b>{booking.room?.type}</b>
-                    <br />
-                    Сума: <b>{booking.room?.price}₴</b>
+                    Номер: <b>{booking.room?.type}</b><br />
+                    Кількість ночей: <b>{nights}</b><br />
+                    Сума до оплати: <b>{totalAmount}₴</b>
                 </p>
 
                 <label>
-                    Оберіть спосіб оплати:
+                    Спосіб оплати:
                     <select
                         value={method}
                         onChange={(e) => setMethod(e.target.value)}
