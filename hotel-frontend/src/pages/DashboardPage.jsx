@@ -1,18 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell,
-    Legend
-} from "recharts";
-import {
     getStatisticsOverview,
     getMonthlyRevenue,
     getPopularRooms,
@@ -20,49 +7,35 @@ import {
     getRevenueByPaymentMethod,
     getRevenueByPeriod
 } from "../api/api";
+
 import { useAuth } from "../auth/AuthProvider";
+import MyChart from "../components/MyChart"; // <-- універсальний компонент графіка
 
-// --- Головна "супер-безпечна" нормалізація ---
-const asPairs = (data) => {
-    if (!data) return [];
-    if (Array.isArray(data)) return data;
-    if (typeof data === "object") {
-        try {
-            return Object.entries(data);
-        } catch {
-            return [];
-        }
-    }
-    return [];
-};
-
-const toObjects = (data, key1, key2) => {
-    try {
-        return asPairs(data)
-            .filter(
-                (el) =>
-                    Array.isArray(el) &&
-                    el.length === 2 &&
-                    el[0] != null &&
-                    typeof el[0] !== "object"
-            )
-            .map(([k, v]) => ({ [key1]: k, [key2]: v }));
-    } catch (e) {
-        return [];
-    }
+// Універсальна нормалізація масивів
+const normalizeObjects = (arr, key1, key2) => {
+    if (!Array.isArray(arr)) return [];
+    return arr
+        .map(item => {
+            if (item[key1] === undefined || item[key2] === undefined) return null;
+            return {
+                [key1]: item[key1],
+                [key2]: item[key2]
+            };
+        })
+        .filter(Boolean);
 };
 
 const normalizeData = {
     overview: (data) => ({
         ...data,
-        mostBookedRoomTypes: toObjects(data?.mostBookedRoomTypes, "type", "count"),
-        topRatedRooms: toObjects(data?.topRatedRooms, "type", "avgRating"),
-        averagePriceByType: toObjects(data?.averagePriceByType, "type", "price"),
+        mostBookedRoomTypes: normalizeObjects(data?.mostBookedRoomTypes, "type", "count"),
+        topRatedRooms: normalizeObjects(data?.topRatedRooms, "type", "avgRating"),
+        averagePriceByType: normalizeObjects(data?.averagePriceByType, "type", "price"),
     }),
-    monthly: (data) => toObjects(data, "month", "revenue"),
-    popular: (data) => toObjects(data, "type", "count"),
-    rated: (data) => toObjects(data, "type", "avgRating"),
-    methods: (data) => toObjects(data, "method", "amount"),
+    monthly: (data) => normalizeObjects(data, "month", "revenue"),
+    popular: (data) => normalizeObjects(data, "type", "count"),
+    rated: (data) => normalizeObjects(data, "type", "avgRating"),
+    methods: (data) => normalizeObjects(data, "method", "amount"),
 };
 
 export default function DashboardPage() {
@@ -73,17 +46,16 @@ export default function DashboardPage() {
     const [popularRooms, setPopularRooms] = useState([]);
     const [topRatedRooms, setTopRatedRooms] = useState([]);
     const [revenueByMethod, setRevenueByMethod] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // --- Нові стани для "Доходу за період" ---
+    // Дохід за період
     const [revStart, setRevStart] = useState("");
     const [revEnd, setRevEnd] = useState("");
     const [revenuePeriod, setRevenuePeriod] = useState(null);
 
-    const COLORS = ["#007bff", "#28a745", "#ffc107", "#ff4d4f", "#6f42c1"];
-
-    // --- Завантаження всіх стандартних даних ---
+    // Загрузка даних
     useEffect(() => {
         const load = async () => {
             try {
@@ -117,8 +89,7 @@ export default function DashboardPage() {
                     setRevenueByMethod(normalizeData.methods(methodRes.value));
 
             } catch (e) {
-                console.error("❌ Помилка завантаження:", e);
-                setError("Не вдалося завантажити аналітику");
+                setError("Не вдалося завантажити дані");
             } finally {
                 setLoading(false);
             }
@@ -128,68 +99,67 @@ export default function DashboardPage() {
         else setLoading(false);
     }, [isAuthenticated, user]);
 
-    // --- Функція завантаження доходу за період ---
+    // Дохід за період
     const loadRevenuePeriod = async () => {
         if (!revStart || !revEnd) return;
-
         try {
             const data = await getRevenueByPeriod(revStart, revEnd);
             setRevenuePeriod(data);
         } catch (e) {
-            console.error("Помилка завантаження доходу за період:", e);
+            console.error(e);
         }
     };
 
     if (!isAuthenticated || !user)
-        return <p style={{ textAlign: "center", marginTop: "50px" }}>🚫 Доступ заборонено.</p>;
+        return <p style={{ textAlign: "center", marginTop: 50 }}>🚫 Доступ заборонено.</p>;
 
     if (loading)
-        return <p style={{ textAlign: "center", marginTop: "50px" }}>⏳ Завантаження...</p>;
+        return <p style={{ textAlign: "center", marginTop: 50 }}>⏳ Завантаження...</p>;
 
     if (error || !overview)
-        return <p style={{ textAlign: "center", marginTop: "50px" }}>⚠️ Дані недоступні.</p>;
+        return <p style={{ textAlign: "center", marginTop: 50 }}>⚠️ Дані недоступні.</p>;
 
     return (
         <div className="dashboard-container">
+
             <header className="dashboard-header">
                 <h1>📊 Аналітика готелю</h1>
-                <p>Вітаємо, {user.name || "користувач"}! Нижче показано актуальні дані.</p>
+                <p>Вітаємо, {user.name}!</p>
             </header>
 
-            {/* === ОГЛЯД === */}
+            {/* ОГЛЯД */}
             <section className="overview-section">
                 <div className="stat-card">
                     <h3>Бронювання</h3>
                     <p className="value">{overview.totalBookings}</p>
-                    <span>усього</span>
                 </div>
+
                 <div className="stat-card">
                     <h3>Активні</h3>
                     <p className="value green">{overview.activeBookings}</p>
-                    <span>поточні</span>
                 </div>
+
                 <div className="stat-card">
                     <h3>Скасовані</h3>
                     <p className="value red">{overview.canceledBookings}</p>
-                    <span>всього</span>
                 </div>
+
                 <div className="stat-card">
                     <h3>Дохід</h3>
                     <p className="value blue">{overview.totalRevenue.toFixed(2)} ₴</p>
-                    <span>усього</span>
                 </div>
+
                 <div className="stat-card">
                     <h3>Середній рейтинг</h3>
-                    <p className="value yellow">{overview.averageRating?.toFixed(1) || "—"} ⭐</p>
-                    <span>по всіх номерах</span>
+                    <p className="value yellow">{overview.averageRating?.toFixed(1)} ⭐</p>
                 </div>
             </section>
 
-            {/* === ДОХОДИ ЗА ПЕРІОД === */}
+            {/* Дохід за період */}
             <section className="chart-section">
                 <h2>💵 Дохід за вибраний період</h2>
 
-                <div className="filters-row" style={{ display: "flex", gap: "16px", marginBottom: "14px" }}>
+                <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
                     <input type="date" value={revStart} onChange={(e) => setRevStart(e.target.value)} />
                     <input type="date" value={revEnd} onChange={(e) => setRevEnd(e.target.value)} />
                     <button onClick={loadRevenuePeriod}>Завантажити</button>
@@ -197,87 +167,84 @@ export default function DashboardPage() {
 
                 {revenuePeriod ? (
                     <div className="period-box">
-                        <p>
-                            📅 Період: <b>{revStart}</b> → <b>{revEnd}</b>
-                        </p>
-                        <p>
-                            💰 Доход: <b style={{ color: "green" }}>{revenuePeriod.totalRevenue} ₴</b>
-                        </p>
+                        <p>📅 <b>{revStart}</b> → <b>{revEnd}</b></p>
+                        <p>💰 Дохід: <b>{revenuePeriod.totalRevenue} ₴</b></p>
                     </div>
                 ) : (
-                    <p>Оберіть період для перегляду доходів.</p>
+                    <p>Оберіть період.</p>
                 )}
             </section>
 
-            {/* === ІНШІ ГРАФІКИ === */}
-
+            {/* Дохід по місяцях */}
             <section className="chart-section">
-                <h2>💰 Дохід по місяцях</h2>
-                {monthlyRevenue.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={monthlyRevenue}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="revenue" fill="#007bff" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                ) : <p>Немає даних.</p>}
+                <MyChart
+                    option={{
+                        title: { text: "💰 Дохід по місяцях" },
+                        tooltip: {},
+                        xAxis: { type: "category", data: monthlyRevenue.map(x => x.month) },
+                        yAxis: { type: "value" },
+                        series: [{
+                            type: "bar",
+                            data: monthlyRevenue.map(x => x.revenue),
+                            itemStyle: { color: "#007bff" }
+                        }]
+                    }}
+                />
             </section>
 
+            {/* Популярні номери */}
             <section className="chart-section">
-                <h2>🏨 Популярні типи номерів</h2>
-                {popularRooms.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={popularRooms}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="type" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="count" fill="#28a745" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                ) : <p>Немає даних.</p>}
+                <MyChart
+                    option={{
+                        title: { text: "🏨 Популярні типи номерів" },
+                        tooltip: {},
+                        xAxis: { type: "category", data: popularRooms.map(x => x.type) },
+                        yAxis: {},
+                        series: [{
+                            type: "bar",
+                            data: popularRooms.map(x => x.count),
+                            itemStyle: { color: "#28a745" }
+                        }]
+                    }}
+                />
             </section>
 
+            {/* Найкращі кімнати */}
             <section className="chart-section">
-                <h2>⭐ Найкращі кімнати</h2>
-                {topRatedRooms.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={350}>
-                        <BarChart data={topRatedRooms}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="type" />
-                            <YAxis domain={[0, 5]} />
-                            <Tooltip />
-                            <Bar dataKey="avgRating" fill="#ffc107" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                ) : <p>Немає даних.</p>}
+                <MyChart
+                    option={{
+                        title: { text: "⭐ Найкращі кімнати" },
+                        xAxis: { type: "category", data: topRatedRooms.map(x => x.type) },
+                        yAxis: { min: 0, max: 5 },
+                        tooltip: {},
+                        series: [{
+                            type: "bar",
+                            data: topRatedRooms.map(x => x.avgRating),
+                            itemStyle: { color: "#ffc107" }
+                        }]
+                    }}
+                />
             </section>
 
+            {/* Методи оплати */}
             <section className="chart-section">
-                <h2>💳 Розподіл доходів за методом оплати</h2>
-                {revenueByMethod.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={400}>
-                        <PieChart>
-                            <Pie
-                                data={revenueByMethod}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={100}
-                                dataKey="amount"
-                                nameKey="method"
-                            >
-                                {revenueByMethod.map((entry, index) => (
-                                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend />
-                        </PieChart>
-                    </ResponsiveContainer>
-                ) : <p>Немає даних.</p>}
+                <MyChart
+                    height={400}
+                    option={{
+                        title: { text: "💳 Розподіл доходів за типом оплати" },
+                        tooltip: { trigger: "item" },
+                        series: [
+                            {
+                                type: "pie",
+                                radius: "60%",
+                                data: revenueByMethod.map(x => ({
+                                    name: x.method,
+                                    value: x.amount
+                                }))
+                            }
+                        ]
+                    }}
+                />
             </section>
         </div>
     );
