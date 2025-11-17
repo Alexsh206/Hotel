@@ -65,7 +65,7 @@ export default function BookingPage() {
 
     const handleStartChange = (value) => {
         if (isDateBlocked(value)) {
-            alert("❌ Ця дата вже зайнята!");
+            alert(" Ця дата вже зайнята!");
             return;
         }
         setCheckIn(value);
@@ -77,7 +77,7 @@ export default function BookingPage() {
 
     const handleEndChange = (value) => {
         if (isDateBlocked(value)) {
-            alert("❌ У ці дати номер зайнятий!");
+            alert(" У ці дати номер зайнятий!");
             return;
         }
         setCheckOut(value);
@@ -90,8 +90,8 @@ export default function BookingPage() {
         setMessage("");
         setLoading(true);
 
-        if (!isAuthenticated || !user) {
-            setMessage("❌ Ви не авторизовані.");
+        if (!isAuthenticated || !(user?.role === "customer")) {
+            setMessage(" Ви не авторизовані.");
             setLoading(false);
             return;
         }
@@ -114,10 +114,8 @@ export default function BookingPage() {
         }
     };
 
-    // -------------------------------------------------------
-    // UI
-    // -------------------------------------------------------
     return (
+
         <div className="booking-wrapper">
             <div className="booking-card">
                 <h1>Бронювання номера</h1>
