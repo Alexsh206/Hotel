@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class BookingService {
@@ -26,7 +27,15 @@ public class BookingService {
     public Bookings createBooking(Bookings booking) {
         LocalDate from = booking.getCheckIn();
         LocalDate to = booking.getCheckOut();
+        boolean conflict = bookingRepo.hasConflict(
+                booking.getRoom().getId(),
+                booking.getCheckIn(),
+                booking.getCheckOut()
+        );
 
+        if (conflict) {
+            throw new RuntimeException("Room already booked for selected dates");
+        }
         if (from == null || to == null || !from.isBefore(to)) {
             throw new IllegalArgumentException("Invalid booking dates");
         }
@@ -79,4 +88,15 @@ public class BookingService {
 
         return bookingRepo.save(existing);
     }
+    public List<Map<String, LocalDate>> getUnavailableDates(Long roomId) {
+        List<Bookings> bookings = bookingRepo.findFutureBookingsByRoom(roomId, LocalDate.now());
+
+        return bookings.stream()
+                .map(b -> Map.of(
+                        "start", b.getCheckIn(),
+                        "end", b.getCheckOut()
+                ))
+                .toList();
+    }
+
 }

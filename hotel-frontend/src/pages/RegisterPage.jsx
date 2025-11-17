@@ -27,12 +27,12 @@ export default function RegisterPage() {
             });
 
             if (res.status === 200 || res.status === 201) {
-                setMessage("✅ Реєстрація успішна! Тепер увійдіть у свій акаунт.");
+                setMessage(" Реєстрація успішна! Тепер увійдіть у свій акаунт.");
                 setTimeout(() => nav("/login"), 1500);
             }
         } catch (err) {
             console.error("Помилка реєстрації:", err);
-            setMessage("❌ Не вдалося зареєструвати користувача. Можливо, email вже існує.");
+            setMessage(" Не вдалося зареєструвати користувача. Можливо, email вже існує.");
         } finally {
             setLoading(false);
         }

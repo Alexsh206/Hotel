@@ -9,9 +9,8 @@ import {
 } from "../api/api";
 
 import { useAuth } from "../auth/AuthProvider";
-import MyChart from "../components/MyChart"; // <-- універсальний компонент графіка
+import MyChart from "../components/MyChart";
 
-// Універсальна нормалізація масивів
 const normalizeObjects = (arr, key1, key2) => {
     if (!Array.isArray(arr)) return [];
     return arr
@@ -50,12 +49,10 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Дохід за період
     const [revStart, setRevStart] = useState("");
     const [revEnd, setRevEnd] = useState("");
     const [revenuePeriod, setRevenuePeriod] = useState(null);
 
-    // Загрузка даних
     useEffect(() => {
         const load = async () => {
             try {
@@ -99,7 +96,6 @@ export default function DashboardPage() {
         else setLoading(false);
     }, [isAuthenticated, user]);
 
-    // Дохід за період
     const loadRevenuePeriod = async () => {
         if (!revStart || !revEnd) return;
         try {
@@ -123,7 +119,7 @@ export default function DashboardPage() {
         <div className="dashboard-container">
 
             <header className="dashboard-header">
-                <h1>📊 Аналітика готелю</h1>
+                <h1>Аналітика готелю</h1>
                 <p>Вітаємо, {user.name}!</p>
             </header>
 
@@ -155,7 +151,6 @@ export default function DashboardPage() {
                 </div>
             </section>
 
-            {/* Дохід за період */}
             <section className="chart-section">
                 <h2>💵 Дохід за вибраний період</h2>
 
@@ -175,7 +170,6 @@ export default function DashboardPage() {
                 )}
             </section>
 
-            {/* Дохід по місяцях */}
             <section className="chart-section">
                 <MyChart
                     option={{
@@ -192,7 +186,6 @@ export default function DashboardPage() {
                 />
             </section>
 
-            {/* Популярні номери */}
             <section className="chart-section">
                 <MyChart
                     option={{
@@ -209,7 +202,6 @@ export default function DashboardPage() {
                 />
             </section>
 
-            {/* Найкращі кімнати */}
             <section className="chart-section">
                 <MyChart
                     option={{
@@ -226,7 +218,6 @@ export default function DashboardPage() {
                 />
             </section>
 
-            {/* Методи оплати */}
             <section className="chart-section">
                 <MyChart
                     height={400}

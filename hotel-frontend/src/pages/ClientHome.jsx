@@ -29,10 +29,9 @@ const ClientHome = () => {
 
     return (
         <div className="client-home">
-            {/* 🔹 Верхній хедер */}
             <header className="home-header">
                 <div className="logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-                    🏨 Hotel Booking
+                    Hotel Booking
                 </div>
 
                 <div className="auth-buttons">
@@ -47,35 +46,26 @@ const ClientHome = () => {
                         </>
                     ) : (
                         <>
-                            {(user?.role === "STAFF" || user?.role === "ADMIN") && (
-                                <button
-                                    className="btn-dashboard"
-                                    onClick={() => navigate("/dashboard")}
-                                >
-                                    📊 Аналітика
-                                </button>
-                            )}
 
+                            {(user?.role === "customer") && (
                             <button className="btn-profile" onClick={() => navigate("/customer")}>
-                                👤 Мій профіль
-                            </button>
+                                 Мій профіль
+                            </button>)}
 
                             <button className="btn-logout" onClick={logout}>
-                                🚪 Вийти
+                                 Вийти
                             </button>
                         </>
                     )}
                 </div>
             </header>
 
-            {/* 🔹 Інформаційний блок */}
             <HotelInfo />
 
             <h2 style={{ textAlign: "center", marginTop: "25px" }}>Наші номери</h2>
 
-            {/* 🔹 Список кімнат */}
             {loading ? (
-                <p style={{ textAlign: "center", marginTop: "20px" }}>⏳ Завантаження...</p>
+                <p style={{ textAlign: "center", marginTop: "20px" }}> Завантаження...</p>
             ) : (
                 <div className="room-list">
                     {rooms.map((room) => (

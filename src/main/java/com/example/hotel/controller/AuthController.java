@@ -38,7 +38,6 @@ public class AuthController {
         return doLogin(creds);
     }
 
-    // Загальна логіка логіну
     private ResponseEntity<?> doLogin(LoginRequest creds) {
         return customerService.login(creds.getEmail(), creds.getPassword())
                 .map(c -> buildResponse(c.getId(), "customer",

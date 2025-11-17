@@ -71,11 +71,11 @@ export default function StaffPage() {
                         className="btn-dashboard"
                         onClick={() => navigate("/dashboard")}
                     >
-                        📊 Аналітика
+                         Аналітика
                     </button>
 
                     <button className="logout-btn" onClick={logout}>
-                        🚪 Вийти
+                         Вийти
                     </button>
                 </div>
             </header>
@@ -146,7 +146,7 @@ export default function StaffPage() {
                                 className="save-btn"
                                 onClick={() => updateBooking(b.id, "status", b.status)}
                             >
-                                💾 Зберегти
+                                Зберегти
                             </button>
                         </td>
                     </tr>

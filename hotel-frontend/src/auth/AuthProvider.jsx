@@ -52,7 +52,6 @@ export function AuthProvider({ children }) {
         return false;
     };
 
-    // 🔹 3. Вихід
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");

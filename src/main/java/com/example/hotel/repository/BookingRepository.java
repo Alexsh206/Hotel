@@ -27,14 +27,29 @@ public interface BookingRepository extends JpaRepository<Bookings, Long> {
     );
     List<Bookings> findByCustomerId(Long id);
 
-    // 🔹 Підрахунок бронювань за статусом
     long countByStatus(BookingStatus status);
 
-    // 🔹 Бронювання за період (для динаміки)
     @Query("SELECT b FROM Bookings b WHERE b.checkIn >= :from AND b.checkOut <= :to")
     List<Bookings> findByPeriod(LocalDate from, LocalDate to);
 
-    // 🔹 Найпопулярніші типи кімнат
     @Query("SELECT b.room.type, COUNT(b) FROM Bookings b GROUP BY b.room.type ORDER BY COUNT(b) DESC")
     List<Object[]> getMostBookedRoomTypes();
+    @Query("""
+        SELECT COUNT(b) > 0 FROM Bookings b
+        WHERE b.room.id = :roomId
+        AND b.checkOut > :start
+        AND b.checkIn < :end
+    """)
+    boolean hasConflict(
+            @Param("roomId") Long roomId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
+    @Query("""
+       SELECT b FROM Bookings b 
+       WHERE b.room.id = :roomId
+       AND b.checkOut >= :today
+    """)
+    List<Bookings> findFutureBookingsByRoom(@Param("roomId") Long roomId,
+                                            @Param("today") LocalDate today);
 }

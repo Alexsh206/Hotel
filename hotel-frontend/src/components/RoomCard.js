@@ -11,7 +11,6 @@ const RoomCard = ({ room }) => {
     const [rating, setRating] = useState("");
     const [comment, setComment] = useState("");
 
-    // 🧩 Отримання всіх відгуків
     useEffect(() => {
         getReviews()
             .then((res) => {
@@ -21,13 +20,11 @@ const RoomCard = ({ room }) => {
             .catch((err) => console.error("Помилка завантаження відгуків:", err));
     }, [room.id]);
 
-    // 🧮 Середня оцінка
     const avgRating =
         reviews.length > 0
             ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
             : "—";
 
-    // 🖼️ Зображення номеру
     const getRoomImage = (type) => {
         const map = {
             "Budget Double Room": "/assets/rooms/budget.jpg",
@@ -41,7 +38,6 @@ const RoomCard = ({ room }) => {
         return map[type] || "/assets/rooms/default.jpg";
     };
 
-    // 📝 Опис номеру
     const getRoomDescription = (type) => {
         const descriptions = {
             "Budget Double Room": "Затишний економ-номер для двох із базовими зручностями та приємним інтер’єром.",
@@ -55,10 +51,9 @@ const RoomCard = ({ room }) => {
         return descriptions[type] || "Сучасний номер із комфортними умовами, кондиціонером, Wi-Fi та сніданком.";
     };
 
-    // 🪙 Перехід до бронювання
     const handleBook = (e) => {
         e.stopPropagation();
-        navigate(`/booking?roomId=${room.id}`);
+        navigate("/booking", { state: { roomId: room.id } });
     };
 
     const handleSubmitReview = async (e) => {
@@ -80,7 +75,7 @@ const RoomCard = ({ room }) => {
             setComment("");
             const updated = await getReviews();
             setReviews(updated.data.filter(r => r.room?.id === room.id));
-            alert("✅ Відгук успішно додано!");
+            alert("Відгук успішно додано!");
         } catch (err) {
             console.error("Помилка створення відгуку:", err);
         }
@@ -106,7 +101,6 @@ const RoomCard = ({ room }) => {
                     Забронювати
                 </button>
 
-                {/* ✨ Форма для відгуку */}
                 {isAuthenticated && (
                     <form className="review-form" onSubmit={handleSubmitReview}>
                         <h4>Залишити відгук</h4>

@@ -58,7 +58,6 @@ public class ProfileController {
                 ));
             }
         } catch (JwtException e) {
-            // токен истёк или неверен
             return ResponseEntity.status(401).build();
         }
     }

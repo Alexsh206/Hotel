@@ -22,7 +22,10 @@ export async function getRooms() {
     const res = await http.get("/rooms");
     return res.data;
 }
-
+export const getUnavailableDates = async (roomId) => {
+    const res = await axios.get(`${API_BASE}/bookings/room/${roomId}/unavailable-dates`);
+    return res.data;
+};
 
 export async function getBookings() {
     const res = await http.get("/bookings");
@@ -59,25 +62,21 @@ export async function getStatisticsOverview() {
     return res.data;
 }
 
-// 🔹 Доходи по місяцях
 export async function getMonthlyRevenue() {
     const res = await axios.get(`${API_BASE}/statistics/revenue/monthly`);
     return res.data;
 }
 
-// 🔹 Популярні типи кімнат
 export async function getPopularRooms() {
     const res = await axios.get(`${API_BASE}/statistics/rooms/popular`);
     return res.data;
 }
 
-// 🔹 Топ кімнати за рейтингом
 export async function getTopRatedRooms() {
     const res = await axios.get(`${API_BASE}/statistics/rooms/top-rated`);
     return res.data;
 }
 
-// 🔹 Доходи за типом оплати
 export async function getRevenueByPaymentMethod() {
     const res = await axios.get(`${API_BASE}/statistics/revenue/methods`);
     return res.data;
@@ -98,7 +97,7 @@ export const getRevenueByPeriod = async (start, end) => {
         );
         return res.data;
     } catch (err) {
-        console.error("❌ Error fetching revenue by period:", err);
+        console.error(" Error fetching revenue by period:", err);
         throw err;
     }
 };

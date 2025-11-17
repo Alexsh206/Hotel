@@ -468,7 +468,6 @@ section {
     min-height: 100vh;
     font-family: "Segoe UI", Arial, sans-serif;
 }
-
 .dashboard-header {
     text-align: center;
     margin-bottom: 40px;
@@ -486,11 +485,20 @@ section {
 
 .overview-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(2, 1fr); /* 🔥 завжди 2 колонки */
     gap: 20px;
     margin-bottom: 50px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+/* 📱 Адаптив — на маленьких екранах 1 колонка */
+@media (max-width: 600px) {
+    .overview-section {
+        grid-template-columns: 1fr;
+    }
+}
 .stat-card {
     background: #fff;
     border-radius: 12px;
@@ -522,14 +530,16 @@ section {
 .value.blue { color: #007bff; }
 .value.yellow { color: #ffc107; }
 
-.chart-section {
+.chart-section,
+.overview-section-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto 40px auto;
+    padding: 30px;
     background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 40px;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
 }
-
 .chart-section h2 {
     text-align: center;
     margin-bottom: 20px;
